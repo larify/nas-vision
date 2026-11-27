@@ -7,6 +7,7 @@ import { Carousel, CarouselContent, CarouselItem } from '@/components/ui/carouse
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Loading } from '@/components/common/Loading';
 import { useSidebar } from '@/hooks/useSidebar';
+import { useSession } from '@/lib/auth-client';
 import { useAppList } from '@/stores/app-list';
 import { defaultLocale, isLocale } from '@/i18n/config';
 import { useWeatherStorage } from '../hooks/useWeatherStorage';
@@ -17,6 +18,8 @@ import { getTranslator } from '../i18n';
 import { WeatherPagination } from '../components/WeatherPagination';
 
 export default function WeatherPage() {
+  const { data: session } = useSession();
+  const signedIn = !!session;
   const appId = useAppList((state) => state.activePluginId);
   const { register, unmount } = useSidebar();
   const rawLocale = useLocale();
@@ -27,7 +30,7 @@ export default function WeatherPage() {
   const [isAdding, setIsAdding] = useState(false);
 
   useEffect(() => {
-    if (!appId) {
+    if (!appId || !signedIn) {
       unmount('cities');
 
       return;
@@ -36,6 +39,7 @@ export default function WeatherPage() {
     register([
       {
         name: 'cities',
+        auth: true,
         label: cityManagementLabel,
         type: 'apps',
         icon: MapPinHouse,
@@ -54,7 +58,7 @@ export default function WeatherPage() {
         ),
       },
     ]);
-  }, [appId, cityManagementLabel, locale, register, unmount]);
+  }, [appId, signedIn, cityManagementLabel, locale, register, unmount]);
 
   return (
     <div className="flex min-h-0 w-full min-w-0 flex-1 flex-col gap-3 p-5">
@@ -65,7 +69,7 @@ export default function WeatherPage() {
           {t('settings.loadFailed')}
         </p>
       ) : cities.length === 0 ? (
-        <Empty locale={locale} onAdd={() => setIsAdding(true)} />
+        <Empty locale={locale} onAdd={signedIn ? () => setIsAdding(true) : undefined} />
       ) : (
         <Carousel
           className="flex min-h-0 w-full min-w-0 flex-1 flex-col gap-3 [&>[data-slot=carousel-content]]:flex [&>[data-slot=carousel-content]]:min-h-0 [&>[data-slot=carousel-content]]:flex-1 [&>[data-slot=carousel-content]]:flex-col"
@@ -90,7 +94,7 @@ export default function WeatherPage() {
           <WeatherPagination cities={cities} locale={locale} />
         </Carousel>
       )}
-      {isAdding && appId && (
+      {signedIn && isAdding && appId && (
         <WeatherCityModal locale={locale} defaultCards={cards} onSave={create} onClose={() => setIsAdding(false)} />
       )}
     </div>

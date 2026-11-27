@@ -2,7 +2,7 @@ name: nas-vision
 
 services:
   app:
-    image: ghcr.io/ofwh/nas-vision:latest
+    image: ghcr.io/larify/nas-vision:latest
     restart: unless-stopped
     environment:
       BETTER_AUTH_SECRET: ${BETTER_AUTH_SECRET}

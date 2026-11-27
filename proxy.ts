@@ -22,5 +22,15 @@ export async function proxy(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ['/((?!$|api/(?:auth|public)(?:/|$)|_next(?:/|$)|static(?:/|$)|favicon\\.ico$).*)'],
+  matcher: [
+    '/resources/:path*',
+    '/api/apps/:path*',
+    '/api/config/:path*',
+    // 插件使用接口免登录，仅管理接口鉴权。
+    '/api/plugin/:action(list|config|update)/:path*',
+    '/api/upload/:path*',
+    // 其他 API 默认鉴权，认证入口与公开接口除外。
+    '/api/((?!(?:auth|public|apps|config|plugin|upload)(?:/|$)).*)',
+    '/((?!$|api/|resources(?:/|$)|_next(?:/|$)|static(?:/|$)|favicon\\.ico$).*)',
+  ],
 };

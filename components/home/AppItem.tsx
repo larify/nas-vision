@@ -1,11 +1,12 @@
 'use client';
 
-import { AppWindow } from 'lucide-react';
+import { AppWindow, ExternalLink } from 'lucide-react';
 import Image from 'next/image';
 import { useTranslations } from 'next-intl';
 import { useEffect, useRef, useState } from 'react';
 import { LiquidGlass } from '@/components/common/LiquidGlass';
 import { WindowModal } from '@/components/common/WindowModal';
+import { Button } from '@/components/ui/button';
 import { PluginPageContext, usePlugin } from '@/hooks/usePlugin';
 import { useSidebar } from '@/hooks/useSidebar';
 import { Loading } from '@/components/common/Loading';
@@ -57,6 +58,8 @@ function AppUrlDialog({
   config: AppRecord['config'];
   onClose: () => void;
 }) {
+  const t = useTranslations();
+
   useAppSidebar(name, image);
   const width = typeof config.width === 'number' && config.width > 0 ? config.width : 1280;
   const height = typeof config.height === 'number' && config.height > 0 ? config.height : 800;
@@ -72,6 +75,21 @@ function AppUrlDialog({
       title={name}
       src={url}
       mode={config.mode === 'floating' ? 'floating' : 'controls'}
+      header={{
+        right: (
+          <Button
+            variant="ghost"
+            size="icon-sm"
+            nativeButton={false}
+            aria-label={t('common.openInNewTab')}
+            title={t('common.openInNewTab')}
+            className="rounded-full"
+            render={<a href={url} target="_blank" rel="noopener noreferrer" />}
+          >
+            <ExternalLink aria-hidden />
+          </Button>
+        ),
+      }}
       top={config.top === true}
       resizable={config.resize === true}
       size={{ width, height }}

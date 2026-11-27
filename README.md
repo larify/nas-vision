@@ -44,6 +44,12 @@ docker build -t nas-vision:latest .
 启动应用，自动执行迁移，映射端口 3000 并挂载数据目录。
 
 ```bash
+docker run --rm --env-file .env -p 3000:3000 -v ./docker/data:/app/data nas-vision:latest
+```
+
+或者
+
+```bash
 docker run -d --name nas-vision --restart unless-stopped --env-file .env -p 3000:3000 -v "$(pwd)/docker/data:/app/data" -v "$(pwd)/docker/uploads:/app/public/static/uploads" nas-vision:latest
 ```
 
