@@ -1,6 +1,6 @@
 'use client';
 
-import { type CSSProperties, isValidElement, useEffect, useRef, useState } from 'react';
+import { type CSSProperties, isValidElement, useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { useShallow } from 'zustand/react/shallow';
 import { LiquidGlass } from '@/components/common/LiquidGlass';
 import { useSession } from '@/lib/auth-client';
@@ -44,21 +44,26 @@ function sidebarEntries(items: SidebarItem[]): SidebarEntry[] {
 }
 
 export function Sidebar({ visible = true }: { visible?: boolean }) {
-  const { data: session } = useSession();
-  const signedIn = !!session;
+  const { data: session, isPending } = useSession();
+  const signedIn = !isPending && !!session;
+  const storedSignedIn = useSidebarStore((state) => state.signedIn);
   const setSignedIn = useSidebarStore((state) => state.setSignedIn);
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     setSignedIn(signedIn);
   }, [setSignedIn, signedIn]);
 
   const hasItems = useSidebarStore((state) => selectSidebarItems(state).length > 0);
 
+  if (storedSignedIn !== signedIn) {
+    return null;
+  }
+
   return (
     <>
       {visible && hasItems ? (
         <div className="animate-in zoom-in-50 relative z-[1050] ml-[calc(100%_-_124px)] w-17 duration-500 ease-out">
-          <SidebarContent />
+          <SidebarContent key={String(signedIn)} />
         </div>
       ) : null}
       <SidebarOutlet />
@@ -67,7 +72,7 @@ export function Sidebar({ visible = true }: { visible?: boolean }) {
 }
 
 function SidebarOutlet() {
-  const item = useSidebarStore((state) => state.items.find((item) => item.name === state.openedName));
+  const item = useSidebarStore((state) => selectSidebarItems(state).find((item) => item.name === state.openedName));
   const close = useSidebarStore((state) => state.close);
 
   if (!item?.menu.render) {

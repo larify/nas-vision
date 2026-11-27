@@ -56,12 +56,11 @@ export function selectSidebarItems({
   type,
   signedIn,
 }: Pick<SidebarStore, 'items' | 'type' | 'signedIn'>): SidebarItem[] {
-  const only = type !== null && items.some((item) => item.menu.type === type && item.only);
+  const allowedItems = items.filter((item) => !item.menu.auth || signedIn);
+  const only = type !== null && allowedItems.some((item) => item.menu.type === type && item.only);
 
-  return items.filter(
-    (item) =>
-      (!item.menu.auth || signedIn) &&
-      (type === null || item.menu.type === type || (!only && item.menu.type === 'common')),
+  return allowedItems.filter(
+    (item) => type === null || item.menu.type === type || (!only && item.menu.type === 'common'),
   );
 }
 

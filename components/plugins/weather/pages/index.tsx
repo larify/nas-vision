@@ -30,7 +30,7 @@ export default function WeatherPage() {
   const [isAdding, setIsAdding] = useState(false);
 
   useEffect(() => {
-    if (!appId || !signedIn) {
+    if (!appId) {
       unmount('cities');
 
       return;
@@ -58,7 +58,9 @@ export default function WeatherPage() {
         ),
       },
     ]);
-  }, [appId, signedIn, cityManagementLabel, locale, register, unmount]);
+
+    return () => unmount('cities');
+  }, [appId, cityManagementLabel, locale, register, unmount]);
 
   return (
     <div className="flex min-h-0 w-full min-w-0 flex-1 flex-col gap-3 p-5">
