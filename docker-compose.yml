@@ -11,7 +11,7 @@ services:
     #   - '3000:3000'
     volumes:
       - ${NAS_VISION_DATA:-./data}:/app/data
-      - ${NAS_VISION_UPLOADS:-./uploads}:/app/public/static/uploads
+      - ${NAS_VISION_UPLOADS:-./data/uploads}:/app/public/static/uploads
     networks:
       nas-vision-network:
         ipv4_address: ${NAS_VISION_IP_ADDRESS}

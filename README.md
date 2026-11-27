@@ -21,7 +21,8 @@ pnpm install --frozen-lockfile
 创建数据目录并执行数据库迁移。
 
 ```bash
-mkdir -p data
+mkdir -p data/uploads
+chmod -R 777 data
 pnpm db:migrate
 ```
 
