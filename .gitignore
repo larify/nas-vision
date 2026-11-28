@@ -38,9 +38,6 @@ yarn-error.log*
 # local data
 /data
 
-# uploaded files
-uploads
-
 # vercel
 .vercel
 

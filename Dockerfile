@@ -28,8 +28,8 @@ ENV HOSTNAME=0.0.0.0
 ENV PORT=3000
 ENV DATABASE_URL=/app/data/data.db
 
-RUN mkdir -p /app/data /app/public/static/uploads /app/.next/cache \
-    && chown -R node:node /app/data /app/public/static/uploads /app/.next/cache
+RUN mkdir -p /app/data /app/.next/cache \
+    && chown -R node:node /app/data /app/.next/cache
 
 COPY --chown=node:node drizzle ./drizzle
 

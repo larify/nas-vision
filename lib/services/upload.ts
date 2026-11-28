@@ -1,4 +1,4 @@
-import { mkdir, rm, writeFile } from 'node:fs/promises';
+import { mkdir, readFile, rm, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 import { UPLOAD_RELATIVE_DIR, UPLOAD_URL_PREFIX } from '@/constants';
 import { appError, type Result } from '@/lib/api';
@@ -26,8 +26,21 @@ export type UploadRemoveRes = {
   url: string;
 };
 
-/** 落在 public 下，Next 直接当静态资源发；但生产只在启动时扫一次 public，新文件要等重启。 */
-const UPLOAD_ROOT = path.join(process.cwd(), 'public', UPLOAD_RELATIVE_DIR);
+const UPLOAD_ROOT = path.join(process.cwd(), UPLOAD_RELATIVE_DIR);
+
+export async function read(name: string): Promise<Result<Uint8Array<ArrayBuffer>>> {
+  const target = resolve(`${UPLOAD_URL_PREFIX}/${name}`);
+
+  if (!target) {
+    return { ok: false, error: appError('common.REQUEST_FAILED') };
+  }
+
+  try {
+    return { ok: true, value: new Uint8Array(await readFile(target)) };
+  } catch {
+    return { ok: false, error: appError('common.REQUEST_FAILED') };
+  }
+}
 
 export async function upload({ files }: UploadParams): Promise<Result<UploadRes>> {
   if (!files.length) {
@@ -73,12 +86,17 @@ function resolve(url: string): string | null {
     return null;
   }
 
-  const target = path.resolve(UPLOAD_ROOT, url.slice(UPLOAD_URL_PREFIX.length + 1));
+  const name = url.slice(UPLOAD_URL_PREFIX.length + 1);
+
+  if (!/^[a-zA-Z0-9][a-zA-Z0-9._-]*$/.test(name)) {
+    return null;
+  }
+
+  const target = path.resolve(UPLOAD_ROOT, name);
 
   return target.startsWith(`${UPLOAD_ROOT}${path.sep}`) ? target : null;
 }
 
-/** 落盘用随机 uuid + 原扩展名：重名与怪异原名都不影响，扩展名还得管 Content-Type。 */
 async function save(file: File): Promise<UploadItem> {
   const name = `${crypto.randomUUID()}${extension(file.name)}`;
 
@@ -94,6 +112,6 @@ function extension(fileName: string): string {
   return /^\.[a-z0-9]{1,10}$/.test(ext) ? ext : '';
 }
 
-const uploadService = { upload, remove };
+const uploadService = { upload, read, remove };
 
 export default uploadService;

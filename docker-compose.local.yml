@@ -11,4 +11,3 @@ services:
       - '3000:3000'
     volumes:
       - ${NAS_VISION_DATA:-./data}:/app/data
-      - ${NAS_VISION_UPLOADS:-./data/uploads}:/app/public/static/uploads
